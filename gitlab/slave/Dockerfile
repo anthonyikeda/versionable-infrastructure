@@ -17,12 +17,19 @@ RUN groupadd -g ${gid} ${group} \
     && useradd -d "$JENKINS_HOME" -u ${uid} -g ${gid} -m -s /bin/bash ${user}
 
 RUN echo "jenkins:jenkins" | chpasswd
-RUN mkdir -p /var/jenkins_home/.ssh
-RUN chown -R jenkins:jenkins /var/jenkins_home
-RUN touch /var/jenkins_home/.ssh/known_hosts
 
-VOLUME /var/jenkins_home
+RUN mkdir -p /var/jenkins_home/.ssh
+RUN chown jenkins:jenkins /var/jenkins_home/.ssh
+
+ADD keys/server_rsa.pub /tmp/server_rsa.pub
+RUN chmod 400 /tmp/server_rsa.pub
+ADD startup.sh /var/jenkins_home/startup.sh
+RUN chmod g+x /var/jenkins_home/startup.sh
+RUN chown jenkins:jenkins /var/jenkins_home/startup.sh
+
+USER jenkins
+RUN touch /var/jenkins_home/.ssh/known_hosts
 
 EXPOSE 22
 
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/var/jenkins_home/startup.sh"]

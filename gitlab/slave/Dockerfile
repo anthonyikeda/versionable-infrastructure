@@ -22,7 +22,9 @@ RUN mkdir -p /var/jenkins_home/.ssh
 RUN chown jenkins:jenkins /var/jenkins_home/.ssh
 
 ADD keys/server_rsa.pub /tmp/server_rsa.pub
+RUN chown jenkins:jenkins /tmp/server_rsa.pub
 RUN chmod 400 /tmp/server_rsa.pub
+
 ADD startup.sh /var/jenkins_home/startup.sh
 RUN chmod g+x /var/jenkins_home/startup.sh
 RUN chown jenkins:jenkins /var/jenkins_home/startup.sh

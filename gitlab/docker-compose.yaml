@@ -1,0 +1,59 @@
+version: "3.1"
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    hostname: gitlab.example.com
+    ports:
+      - 443
+      - 80
+      - 22
+    volumes:
+      - gitlab-config-volume:/etc/gitlab
+      - gitlab-logs-volume:/var/log/gitlab
+      - gitlab-data-volume:/var/opt/gitlab
+    restart: always
+    networks:
+      - devops
+  jenkins:
+    image: jenkins:latest
+    hostname: jenkins.example.com
+    ports:
+      - 8080:8080
+      - 50000:50000
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    networks:
+      - devops
+    links:
+      - jenkins_slave
+    external_links:
+      - gitlab
+  jenkins_slave:
+    build:
+      context: ./slave
+      dockerfile: Dockerfile
+    networks:
+      - devops
+
+volumes:
+  gitlab-config-volume:
+    external: true
+  gitlab-logs-volume:
+    external: true
+  gitlab-data-volume:
+    external: true
+  jenkins_home:
+    external: true
+
+networks:
+  devops:
+    external: true
+#docker run --detach \
+#    --hostname gitlab.example.com \
+#    --publish 443:443 --publish 80:80 --publish 22:22 \
+#    --name gitlab \
+#    --restart always \
+#    --volume /srv/gitlab/config:/etc/gitlab \
+#    --volume /srv/gitlab/logs:/var/log/gitlab \
+#    --volume /srv/gitlab/data:/var/opt/gitlab \
+#    gitlab/gitlab-ce:latest

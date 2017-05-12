@@ -1,0 +1,25 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+$script = <<SCRIPT
+sudo apt-get install -y git-core
+sudo useradd git
+passwd git
+
+ssh-keygen -t rsa -N "" -f /home/vagrant/id_rsa
+mkdir -p /home/vagrant/.ssh && cat /home/vagrant/id_rsa.pub >>  ~/.ssh/authorized_keys
+
+cat id_rsa.pub
+
+SCRIPT
+
+VAGRANTFILE_API_VERSION = "2"
+DEMO_BOX_NAME = ENV['DEMO_BOX_NAME'] || "debian/jessie64"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.box = DEMO_BOX_NAME
+
+  config.vm.provision "shell", inline: $script
+  config.vm.network :forwarded_port, guest: 22, host: 1022
+  config.vm.network :forwarded_port, guest: 80, host: 1080
+end
